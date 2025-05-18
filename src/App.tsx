@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,33 +15,37 @@ import Bids from "./pages/Bids";
 import Publications from "./pages/Publications";
 import NotFound from "./pages/NotFound";
 import React from "react";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import "./i18n"; // Import i18n configuration
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={200}>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/vacancies" element={<Vacancies />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/bids" element={<Bids />} />
-              <Route path="/publications" element={<Publications />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </TooltipProvider>
+      <LanguageProvider>
+        <TooltipProvider delayDuration={200}>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/vacancies" element={<Vacancies />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/bids" element={<Bids />} />
+                <Route path="/publications" element={<Publications />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

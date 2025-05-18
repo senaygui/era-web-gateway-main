@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,22 +46,37 @@ interface HeroCarouselProps {
 }
 
 const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true,
+    align: 'center',
+    skipSnaps: false,
+    dragFree: false
+  });
 
   // Set up auto-play functionality
+  const autoplay = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
+  }, [emblaApi]);
+
   useEffect(() => {
     if (!emblaApi) return;
 
-    const interval = setInterval(() => {
-      emblaApi.scrollNext();
-    }, 1000); // Auto-slide every 1 second
+    // Start autoplay
+    const interval = setInterval(autoplay, 1000);
 
+    // Clean up interval on unmount
     return () => clearInterval(interval);
-  }, [emblaApi]);
+  }, [emblaApi, autoplay]);
 
   return (
     <section className="relative overflow-hidden bg-black">
-      <Carousel className="w-full" setApi={(api) => emblaApi} ref={emblaRef}>
+      <Carousel 
+        className="w-full" 
+        setApi={(api) => emblaApi} 
+        ref={emblaRef}
+        opts={{ loop: true }}
+      >
         <CarouselContent>
           {slides.map((slide) => (
             <CarouselItem key={slide.id}>
@@ -101,9 +115,9 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="container mx-auto relative">
-          <CarouselPrevious className="absolute left-4 z-30" />
-          <CarouselNext className="absolute right-4 z-30" />
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-30">
+          <CarouselPrevious className="static translate-y-0 bg-white/20 hover:bg-white/40 text-white border-none" />
+          <CarouselNext className="static translate-y-0 bg-white/20 hover:bg-white/40 text-white border-none" />
         </div>
       </Carousel>
     </section>

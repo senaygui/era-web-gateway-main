@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -15,54 +14,56 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
 
   const navLinks = [
     { 
-      title: 'Home', 
+      title: t('nav.home'), 
       href: '/'
     },
     { 
-      title: 'About Us', 
+      title: t('nav.about'), 
       href: '/about',
       subLinks: [
-        { title: 'Mission & Vision', href: '/about#mission' },
-        { title: 'History', href: '/about#history' },
-        { title: 'Organizational Structure', href: '/about#structure' },
+        { title: t('nav.mission'), href: '/about#mission' },
+        { title: t('nav.history'), href: '/about#history' },
+        { title: t('nav.structure'), href: '/about#structure' },
       ]
     }, 
     { 
-      title: 'News', 
+      title: t('nav.news'), 
       href: '/news'
     },
     { 
-      title: 'Bids', 
+      title: t('nav.bids'), 
       href: '/bids'
     },
     { 
-      title: 'Events', 
+      title: t('nav.events'), 
       href: '/events'
     },
     { 
-      title: 'Publications', 
+      title: t('nav.publications'), 
       href: '/publications'
     },
     { 
-      title: 'Vacancies', 
+      title: t('nav.vacancies'), 
       href: '/vacancies'
     },
     { 
-      title: 'FAQ', 
+      title: t('nav.faq'), 
       href: '/faq'
     },
     { 
-      title: 'Contact', 
+      title: t('nav.contact'), 
       href: '/contact'
     }
   ];
@@ -81,11 +82,23 @@ const Navbar = () => {
             </a>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="text-era-gray hover:text-era-orange transition-colors">
+            <button 
+              className={cn(
+                "text-era-gray hover:text-era-orange transition-colors",
+                language === 'en' && "text-era-orange font-medium"
+              )}
+              onClick={() => setLanguage('en')}
+            >
               English
             </button>
             <span className="text-era-gray">|</span>
-            <button className="text-era-gray hover:text-era-orange transition-colors">
+            <button 
+              className={cn(
+                "text-era-gray hover:text-era-orange transition-colors",
+                language === 'am' && "text-era-orange font-medium"
+              )}
+              onClick={() => setLanguage('am')}
+            >
               አማርኛ
             </button>
           </div>
@@ -102,7 +115,7 @@ const Navbar = () => {
                 className="w-12 h-12"
               />
               <div>
-                <h1 className="text-lg md:text-xl font-bold text-era-dark">Ethiopian Roads Administration</h1>
+                <h1 className="text-lg md:text-xl font-bold text-era-dark">{t('home.hero.title')}</h1>
               </div>
             </div>
           </Link>
@@ -170,7 +183,7 @@ const Navbar = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search the website..."
+              placeholder={t('nav.search')}
               className="w-full py-2 px-4 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-era-orange"
             />
             <button className="absolute right-3 top-1/2 transform -translate-y-1/2">

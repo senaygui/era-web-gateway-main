@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "news": "News",
+    "bids": "Bids",
+    "events": "Events",
+    "publications": "Publications",
+    "vacancies": "Vacancies",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "mission": "Mission & Vision",
+    "history": "History",
+    "structure": "Organizational Structure",
+    "search": "Search the website..."
+  },
+  "common": {
+    "readMore": "Read More",
+    "viewDetails": "View Details",
+    "viewAll": "View All",
+    "deadline": "Deadline",
+    "category": "Category"
+  },
+  "home": {
+    "hero": {
+      "title": "Ethiopian Roads Administration",
+      "subtitle": "Building Ethiopia's Future Through Quality Roads"
+    },
+    "bids": {
+      "title": "Active Bids & Tenders",
+      "subtitle": "Browse our current bid opportunities and tender announcements"
+    },
+    "news": {
+      "title": "Latest News",
+      "subtitle": "Stay informed about our latest news and updates"
+    }
+  },
+  "footer": {
+    "contact": "Contact Us",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "followUs": "Follow Us",
+    "quickLinks": "Quick Links",
+    "copyright": "© 2023 Ethiopian Roads Administration. All rights reserved."
+  }
+} 
