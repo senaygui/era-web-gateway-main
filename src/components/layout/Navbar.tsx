@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Search, 
   Menu, 
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const location = useLocation();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
@@ -39,6 +40,10 @@ const Navbar = () => {
       ]
     }, 
     { 
+      title: 'Projects', 
+      href: '/projects'
+    },
+    { 
       title: t('nav.news'), 
       href: '/news'
     },
@@ -52,15 +57,20 @@ const Navbar = () => {
     },
     { 
       title: t('nav.publications'), 
-      href: '/publications'
+      href: '/publications',
+      subLinks: [
+        { title: t('publications'), href: '/publications' },
+        { title: t('Road asset'), href: '/roadasset' },
+        { title: t('Performance'), href: 'performance' },
+      ]
     },
     { 
       title: t('nav.vacancies'), 
       href: '/vacancies'
     },
     { 
-      title: t('nav.faq'), 
-      href: '/faq'
+      title: t('districts'), 
+      href: '/districts'
     },
     { 
       title: t('nav.contact'), 
@@ -127,15 +137,27 @@ const Navbar = () => {
                 {link.subLinks ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center space-x-1 text-base">
+                      <Button 
+                        variant="ghost" 
+                        className={cn(
+                          "flex items-center space-x-1 text-sm px-2 py-1",
+                          location.pathname.startsWith(link.href) && "text-era-orange font-medium"
+                        )}
+                      >
                         <span>{link.title}</span>
-                        <ChevronDown size={16} />
+                        <ChevronDown size={12} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="w-48">
+                    <DropdownMenuContent align="start" className="w-40">
                       {link.subLinks.map((subLink) => (
                         <DropdownMenuItem key={subLink.title} asChild>
-                          <Link to={subLink.href} className="w-full cursor-pointer">
+                          <Link 
+                            to={subLink.href} 
+                            className={cn(
+                              "w-full cursor-pointer text-sm",
+                              location.pathname === subLink.href && "text-era-orange font-medium"
+                            )}
+                          >
                             {subLink.title}
                           </Link>
                         </DropdownMenuItem>
@@ -144,7 +166,13 @@ const Navbar = () => {
                   </DropdownMenu>
                 ) : (
                   <Link to={link.href}>
-                    <Button variant="ghost" className="text-base">
+                    <Button 
+                      variant="ghost" 
+                      className={cn(
+                        "text-sm px-2 py-1",
+                        location.pathname === link.href && "text-era-orange font-medium"
+                      )}
+                    >
                       {link.title}
                     </Button>
                   </Link>
@@ -202,7 +230,10 @@ const Navbar = () => {
               <div key={link.title} className="flex flex-col">
                 <Link 
                   to={link.href}
-                  className="py-2 px-4 hover:bg-muted rounded-md font-medium"
+                  className={cn(
+                    "py-2 px-4 hover:bg-muted rounded-md font-medium",
+                    location.pathname === link.href && "text-era-orange font-medium"
+                  )}
                   onClick={() => !link.subLinks && setIsOpen(false)}
                 >
                   {link.title}
@@ -213,7 +244,10 @@ const Navbar = () => {
                       <Link
                         key={subLink.title}
                         to={subLink.href}
-                        className="block py-1.5 text-era-gray hover:text-era-orange"
+                        className={cn(
+                          "block py-1.5 text-era-gray hover:text-era-orange",
+                          location.pathname === subLink.href && "text-era-orange font-medium"
+                        )}
                         onClick={() => setIsOpen(false)}
                       >
                         {subLink.title}

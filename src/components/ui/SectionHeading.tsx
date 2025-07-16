@@ -1,4 +1,3 @@
-
 import { cn } from '@/lib/utils';
 
 interface SectionHeadingProps {
@@ -6,13 +5,15 @@ interface SectionHeadingProps {
   subtitle?: string;
   align?: 'left' | 'center' | 'right';
   className?: string;
+  headingClassName?: string;
 }
 
 export function SectionHeading({ 
   title, 
   subtitle, 
   align = 'left',
-  className 
+  className,
+  headingClassName,
 }: SectionHeadingProps) {
   return (
     <div 
@@ -25,7 +26,7 @@ export function SectionHeading({
         className
       )}
     >
-      <h2 className="font-bold text-2xl md:text-3xl lg:text-4xl text-era-dark">
+      <h2 className={cn("font-bold text-2xl md:text-3xl lg:text-4xl text-era-dark", headingClassName)}>
         {title}
       </h2>
       {subtitle && (

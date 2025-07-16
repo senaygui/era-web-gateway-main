@@ -80,7 +80,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
         <CarouselContent>
           {slides.map((slide) => (
             <CarouselItem key={slide.id}>
-              <div className="relative h-[50vh] md:h-[60vh] lg:h-[80vh] w-full">
+              <div className="relative h-[50vh] md:h-[60vh] lg:h-[85vh] w-full">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40 z-10"></div>
                 <div 
                   className="absolute inset-0 bg-cover bg-center z-0" 

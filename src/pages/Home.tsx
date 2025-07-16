@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   FileText, 
@@ -13,6 +12,7 @@ import SearchSection from '@/components/home/SearchSection';
 import NewsSection from '@/components/home/NewsSection';
 import EventsSection from '@/components/home/EventsSection';
 import BidsSection from '@/components/home/BidsSection';
+import { AdminUsersList } from '../components/AdminUsersList';
 
 const Home = () => {
   // Mock data for the homepage sections
@@ -148,6 +148,7 @@ const Home = () => {
       <BidsSection bids={activeBids} />
       <MissionSection />
       <SearchSection />
+      <AdminUsersList />
     </>
   );
 };

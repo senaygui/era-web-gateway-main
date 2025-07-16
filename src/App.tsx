@@ -10,10 +10,15 @@ import Contact from "./pages/Contact";
 import News from "./pages/News";
 import FAQ from "./pages/FAQ";
 import Vacancies from "./pages/Vacancies";
-import Events from "./pages/Events";
+import Events from './pages/Events';
 import Bids from "./pages/Bids";
 import Publications from "./pages/Publications";
+import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
+import NewsDetail from './pages/NewsDetail';
+import Districts from './pages/Districts';
+import DistrictDetail from './pages/DistrictDetail';
 import React from "react";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import "./i18n"; // Import i18n configuration
@@ -34,11 +39,16 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/vacancies" element={<Vacancies />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/bids" element={<Bids />} />
                 <Route path="/publications" element={<Publications />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/:id" element={<ProjectDetail />} />
+                <Route path="/districts" element={<Districts />} />
+                <Route path="/districts/:id" element={<DistrictDetail />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useVacancies from '@/hooks/useVacancies';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Input } from '@/components/ui/input';
@@ -24,147 +24,46 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-// Sample vacancy data
-const vacancies = [
-  {
-    id: 1,
-    title: "Senior Highway Engineer",
-    department: "Design Department",
-    location: "Addis Ababa",
-    type: "Full-Time",
-    deadline: "April 30, 2025",
-    postedDate: "March 15, 2025",
-    description: "We are seeking an experienced Highway Engineer to join our design team. The successful candidate will be responsible for designing road infrastructure, preparing technical specifications, and overseeing project implementation.",
-    requirements: [
-      "Bachelor's degree in Civil Engineering; Master's degree preferred",
-      "Minimum 8 years of experience in highway engineering",
-      "Proficiency in AutoCAD, Civil 3D, and other relevant design software",
-      "Experience with Ethiopian road design standards",
-      "Strong analytical and problem-solving skills",
-      "Excellent communication and teamwork abilities"
-    ],
-    responsibilities: [
-      "Prepare and review road design drawings and specifications",
-      "Conduct site visits and field investigations",
-      "Collaborate with multi-disciplinary teams on complex projects",
-      "Ensure compliance with technical standards and regulations",
-      "Mentor junior engineers and technicians",
-      "Prepare technical reports and presentations"
-    ],
-    salary: "Competitive salary commensurate with experience",
-    benefits: [
-      "Health insurance",
-      "Transportation allowance",
-      "Professional development opportunities",
-      "Retirement benefits"
-    ]
-  },
-  {
-    id: 2,
-    title: "Environmental Specialist",
-    department: "Environmental & Social Management",
-    location: "Addis Ababa",
-    type: "Full-Time",
-    deadline: "May 15, 2025",
-    postedDate: "March 20, 2025",
-    description: "ERA is looking for an Environmental Specialist to ensure environmental compliance in road projects. The role involves conducting environmental assessments, developing mitigation plans, and monitoring implementation.",
-    requirements: [
-      "Master's degree in Environmental Science, Engineering, or related field",
-      "Minimum 5 years of experience in environmental management for infrastructure projects",
-      "Knowledge of Ethiopian environmental regulations and international standards",
-      "Experience with Environmental Impact Assessment (EIA)",
-      "Strong report writing and presentation skills",
-      "Field work experience"
-    ],
-    responsibilities: [
-      "Conduct environmental screenings and assessments for road projects",
-      "Develop environmental management and monitoring plans",
-      "Ensure compliance with national regulations and donor requirements",
-      "Train project staff on environmental safeguards",
-      "Liaise with environmental regulatory authorities",
-      "Prepare periodic environmental reports"
-    ],
-    salary: "Competitive salary based on qualifications",
-    benefits: [
-      "Health insurance",
-      "Transportation allowance",
-      "Professional development opportunities",
-      "Retirement benefits"
-    ]
-  },
-  {
-    id: 3,
-    title: "Construction Supervisor",
-    department: "Construction Management",
-    location: "Field-based (Various Regions)",
-    type: "Contract (3 years)",
-    deadline: "April 20, 2025",
-    postedDate: "March 10, 2025",
-    description: "We are recruiting Construction Supervisors to oversee road construction projects in various regions of Ethiopia. The position requires extensive field presence and technical expertise.",
-    requirements: [
-      "Bachelor's degree in Civil Engineering or related field",
-      "Minimum 6 years of experience in road construction supervision",
-      "Knowledge of construction methods, quality control, and contract management",
-      "Experience with project scheduling and progress monitoring",
-      "Valid driving license",
-      "Willingness to work in remote locations"
-    ],
-    responsibilities: [
-      "Supervise construction activities to ensure compliance with specifications",
-      "Conduct quality control tests and inspections",
-      "Monitor project progress and prepare reports",
-      "Review and approve contractor submittals",
-      "Identify and resolve construction issues",
-      "Ensure safety standards are maintained on site"
-    ],
-    salary: "Competitive package including field allowances",
-    benefits: [
-      "Health insurance",
-      "Housing allowance for remote postings",
-      "Transportation",
-      "Per diem for field work"
-    ]
-  },
-  {
-    id: 4,
-    title: "GIS Specialist",
-    department: "Planning Department",
-    location: "Addis Ababa",
-    type: "Full-Time",
-    deadline: "May 5, 2025",
-    postedDate: "March 25, 2025",
-    description: "ERA is seeking a GIS Specialist to support road network planning and management. The role involves spatial data management, analysis, and visualization for decision-making.",
-    requirements: [
-      "Bachelor's degree in GIS, Geography, Geomatics, or related field",
-      "Minimum 4 years of experience in GIS applications",
-      "Proficiency in ArcGIS, QGIS, and other relevant software",
-      "Experience with spatial database management",
-      "Knowledge of remote sensing applications",
-      "Programming skills (Python, R) preferred"
-    ],
-    responsibilities: [
-      "Maintain and update the road network GIS database",
-      "Conduct spatial analysis for road planning and management",
-      "Produce maps and visualization for reports and presentations",
-      "Support field data collection using GPS and mobile GIS",
-      "Develop and implement GIS standards and protocols",
-      "Train staff on basic GIS applications"
-    ],
-    salary: "Competitive salary based on experience",
-    benefits: [
-      "Health insurance",
-      "Transportation allowance",
-      "Professional development opportunities",
-      "Retirement benefits"
-    ]
-  }
-];
-
 const Vacancies = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const { toast } = useToast();
+  
+  // Use the useVacancies hook to fetch data
+  const { 
+    vacancies: apiVacancies, 
+    loading, 
+    error,
+    getActiveVacancies 
+  } = useVacancies();
+  
+  // Update vacancies when API data is loaded
+  const [vacancies, setVacancies] = React.useState(apiVacancies);
+  
+  // Update vacancies when API data is loaded
+  React.useEffect(() => {
+    if (apiVacancies && apiVacancies.length > 0) {
+      setVacancies(apiVacancies);
+    } else if (error) {
+      console.error('Error fetching vacancies:', error);
+      toast({
+        title: "Warning",
+        description: "Could not load vacancies.",
+        variant: "destructive"
+      });
+    }
+  }, [apiVacancies, error, toast]);
+  
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-era-blue"></div>
+        <span className="ml-4 text-lg">Loading vacancies...</span>
+      </div>
+    );
+  }
 
   // Filter vacancies based on search and filters
   const filteredVacancies = vacancies.filter(vacancy => {
@@ -294,22 +193,36 @@ const Vacancies = () => {
                           <p>{vacancy.description}</p>
                         </div>
                         
+                        {/* Requirements Section */}
                         <div>
                           <h4 className="font-semibold mb-2">Requirements</h4>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {vacancy.requirements.map((req, index) => (
-                              <li key={index}>{req}</li>
-                            ))}
-                          </ul>
+                          {Array.isArray(vacancy.requirements) && vacancy.requirements.length > 0 ? (
+                            <ul className="list-disc pl-5 space-y-1">
+                              {vacancy.requirements.map((req: any, index: number) => {
+                                // Convert to string and trim, in case it's not already a string
+                                const requirement = String(req || '').trim();
+                                return requirement ? <li key={index}>{requirement}</li> : null;
+                              })}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No specific requirements listed.</p>
+                          )}
                         </div>
                         
+                        {/* Responsibilities Section */}
                         <div>
                           <h4 className="font-semibold mb-2">Responsibilities</h4>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {vacancy.responsibilities.map((resp, index) => (
-                              <li key={index}>{resp}</li>
-                            ))}
-                          </ul>
+                          {Array.isArray(vacancy.responsibilities) && vacancy.responsibilities.length > 0 ? (
+                            <ul className="list-disc pl-5 space-y-1">
+                              {vacancy.responsibilities.map((resp: any, index: number) => {
+                                // Convert to string and trim, in case it's not already a string
+                                const responsibility = String(resp || '').trim();
+                                return responsibility ? <li key={index}>{responsibility}</li> : null;
+                              })}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No specific responsibilities listed.</p>
+                          )}
                         </div>
                         
                         <div>

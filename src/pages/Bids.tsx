@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useBids, useActiveBids, useClosedBids, useFilteredBids, Bid } from '@/hooks/useBids';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { 
@@ -53,8 +54,8 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-// Sample bids data
-const bidsList = [
+// Sample bids data - will be used as fallback if API fails
+const sampleBidsList: Bid[] = [
   {
     id: "ICB-2025-01",
     title: "Design and Construction of Adama-Awash Expressway (90km)",
@@ -271,40 +272,66 @@ const Bids = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedType, setSelectedType] = useState('All Types');
-  const [selectedBid, setSelectedBid] = useState<typeof bidsList[0] | null>(null);
+  const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  // Fetch bids from API
+  const { bids: allBids, loading: allLoading, error: allError } = useBids();
+  const { activeBids, loading: activeLoading, error: activeError } = useActiveBids();
+  const { closedBids, loading: closedLoading, error: closedError } = useClosedBids();
+  const { filteredBids, loading: filterLoading } = useFilteredBids(
+    selectedCategory !== 'All Categories' ? selectedCategory : undefined,
+    selectedType !== 'All Types' ? selectedType : undefined
+  );
+
+  // Use API data or fall back to sample data if API fails
+  const bidsList = allError ? sampleBidsList : allBids;
+  const activeBidsList = activeError ? sampleBidsList.filter(bid => bid.status === 'active') : activeBids;
+  const closedBidsList = closedError ? sampleBidsList.filter(bid => bid.status === 'closed') : closedBids;
+  const filteredBidsList = filterLoading ? bidsList : filteredBids;
+
   // Filter bids based on search, category, and type
-  const filterBids = (bidList: typeof bidsList, status: 'active' | 'closed') => {
+  const filterBids = (bidList: Bid[], status: 'active' | 'closed') => {
     return bidList.filter(bid => {
-      const matchesSearch = searchQuery === '' || 
-        bid.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        bid.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bid.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
+      const matchesSearch = bid.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (bid.id?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+                          ((bid.bid_number || '').toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = selectedCategory === 'All Categories' || bid.category === selectedCategory;
       const matchesType = selectedType === 'All Types' || bid.type === selectedType;
       const matchesStatus = bid.status === status;
-      
       return matchesSearch && matchesCategory && matchesType && matchesStatus;
     });
   };
 
-  const activeBids = filterBids(bidsList, 'active');
-  const closedBids = filterBids(bidsList, 'closed');
+  // Apply search filter to the appropriate bid list
+  const displayedBids = searchQuery ? filteredBidsList.filter(bid => {
+    return bid.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           ((bid.bid_number || '').toLowerCase().includes(searchQuery.toLowerCase())) ||
+           (bid.id?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+  }) : filteredBidsList;
 
   // Handle document download
-  const handleDownload = (bidId: string, documentName: string) => {
-    toast({
-      title: "Download Started",
-      description: `${documentName} is being downloaded.`,
-    });
-    console.log("Downloading document:", documentName, "for bid ID:", bidId);
+  const handleDownload = (document: any) => {
+    // In a real app, this would trigger a download from the URL
+    const url = document.url;
+    if (url) {
+      window.open(url, '_blank');
+      toast({
+        title: "Download Started",
+        description: `Downloading ${document.name || document.filename || 'document'}...`
+      });
+    } else {
+      toast({
+        title: "Download Failed",
+        description: "Document URL not available",
+        variant: "destructive"
+      });
+    }
   };
 
-  // View bid details
-  const viewBidDetails = (bid: typeof bidsList[0]) => {
+  // Open bid details dialog
+  const openBidDetails = (bid: Bid) => {
     setSelectedBid(bid);
     setIsDialogOpen(true);
   };
@@ -363,7 +390,7 @@ const Bids = () => {
           
           {/* Active Bids Tab */}
           <TabsContent value="active" className="mt-6">
-            {activeBids.length > 0 ? (
+            {displayedBids.length > 0 ? (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -371,20 +398,20 @@ const Bids = () => {
                       <TableHead className="w-[120px]">Bid No.</TableHead>
                       <TableHead className="min-w-[250px]">Title</TableHead>
                       <TableHead className="hidden md:table-cell">Category</TableHead>
-                      <TableHead className="hidden md:table-cell">Deadline</TableHead>
+                      <TableHead className="hidden md:table-cell">Published</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {activeBids.map((bid) => (
+                    {displayedBids.map((bid) => (
                       <TableRow key={bid.id}>
-                        <TableCell className="font-medium">{bid.id}</TableCell>
+                        <TableCell className="font-medium">{bid.bid_number || bid.id}</TableCell>
                         <TableCell>{bid.title}</TableCell>
                         <TableCell className="hidden md:table-cell">{bid.category}</TableCell>
                         <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-2 text-era-blue" />
-                            {format(bid.deadlineDate, "MMM d, yyyy")}
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>Published: {bid.publishDate ? format(new Date(bid.publishDate), 'MMM d, yyyy') : 'N/A'}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -392,7 +419,7 @@ const Bids = () => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => viewBidDetails(bid)}
+                              onClick={() => openBidDetails(bid)}
                             >
                               <FileText className="h-4 w-4 mr-1" />
                               <span className="hidden sm:inline">Details</span>
@@ -400,7 +427,7 @@ const Bids = () => {
                             <Button 
                               variant="default" 
                               size="sm"
-                              onClick={() => handleDownload(bid.id, "Bid Document")}
+                              onClick={() => handleDownload(bid.documents[0])}
                             >
                               <Download className="h-4 w-4 mr-1" />
                               <span className="hidden sm:inline">Download</span>
@@ -426,7 +453,7 @@ const Bids = () => {
           
           {/* Closed Bids Tab */}
           <TabsContent value="closed" className="mt-6">
-            {closedBids.length > 0 ? (
+            {closedBidsList.length > 0 ? (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -439,9 +466,9 @@ const Bids = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {closedBids.map((bid) => (
+                    {closedBidsList.map((bid) => (
                       <TableRow key={bid.id}>
-                        <TableCell className="font-medium">{bid.id}</TableCell>
+                        <TableCell className="font-medium">{bid.bid_number || bid.id}</TableCell>
                         <TableCell>{bid.title}</TableCell>
                         <TableCell className="hidden md:table-cell">{bid.category}</TableCell>
                         <TableCell className="hidden md:table-cell">
@@ -466,7 +493,7 @@ const Bids = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => viewBidDetails(bid)}
+                            onClick={() => openBidDetails(bid)}
                           >
                             <FileText className="h-4 w-4 mr-1" />
                             <span className="hidden sm:inline">Details</span>
@@ -504,7 +531,7 @@ const Bids = () => {
               <div className="space-y-4 mt-4">
                 <div>
                   <h4 className="font-semibold mb-2">Description</h4>
-                  <p>{selectedBid.description}</p>
+                  <p>{selectedBid?.description}</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -525,11 +552,11 @@ const Bids = () => {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-medium min-w-32">Published:</span>
-                        {format(selectedBid.publishDate, "MMMM d, yyyy")}
+                        {format(new Date(selectedBid.publishDate), "MMMM d, yyyy")}
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-medium min-w-32">Deadline:</span>
-                        {format(selectedBid.deadlineDate, "MMMM d, yyyy")}
+                        {format(new Date(selectedBid.deadlineDate), "MMMM d, yyyy")}
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-medium min-w-32">Budget:</span>
@@ -547,7 +574,7 @@ const Bids = () => {
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="font-medium min-w-32">Award Date:</span>
-                            {format(selectedBid.awardDate!, "MMMM d, yyyy")}
+                            {format(new Date(selectedBid.awardDate!), "MMMM d, yyyy")}
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="font-medium min-w-32">Contract Value:</span>
@@ -565,10 +592,10 @@ const Bids = () => {
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-2">Eligibility Requirements</h4>
+                    <h4 className="font-semibold mb-2">Eligibility Criteria</h4>
                     <ul className="list-disc pl-5 space-y-1">
-                      {selectedBid.eligibility.map((req, index) => (
-                        <li key={index}>{req}</li>
+                      {(selectedBid?.eligibility || []).map((item, index) => (
+                        <li key={index}>{item}</li>
                       ))}
                     </ul>
                   </div>
@@ -587,7 +614,7 @@ const Bids = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Bid Documents</h4>
                     <div className="space-y-2">
-                      {selectedBid.documents.map((doc, index) => (
+                      {(selectedBid.documents || []).map((doc, index) => (
                         <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
                           <div className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-era-blue" />
@@ -597,9 +624,9 @@ const Bids = () => {
                             </div>
                           </div>
                           <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDownload(selectedBid.id, doc.name)}
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownload(doc)}
                           >
                             <Download className="h-4 w-4 mr-1" />
                             Download
