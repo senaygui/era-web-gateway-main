@@ -45,7 +45,11 @@ export interface Project {
 }
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1' || 'http://172.16.10.27/api/v1' || 'http://172.16.10.27/api/v1',
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/api/v1'
+      : 'http://172.16.10.27/api/v1'),
 });
 
 // Helper to calculate progress based on milestones

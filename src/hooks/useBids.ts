@@ -35,7 +35,11 @@ export interface Bid {
 }
 
 // API base URL from environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1' || 'http://172.16.10.27/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:3000/api/v1'
+    : 'http://172.16.10.27/api/v1');
 
 // Hook for fetching all bids
 export function useBids() {
