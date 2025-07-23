@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   // Ensure we're using the correct API URL
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1' || 'http://172.16.10.27/api/v1',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -24,7 +24,7 @@ export const getFullImageUrl = (imageUrl: string | null | undefined): string | n
   
   // Handle ActiveStorage URLs which start with /rails/active_storage
   if (imageUrl.startsWith('/rails/active_storage')) {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000' || 'http://172.16.10.27/api/v1';
     const baseWithoutApi = baseUrl.replace('/api/v1', '');
     return `${baseWithoutApi}${imageUrl}`;
   }
@@ -35,7 +35,7 @@ export const getFullImageUrl = (imageUrl: string | null | undefined): string | n
   }
   
   // Otherwise, prepend the base URL without the API path
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000' || 'http://172.16.10.27/api/v1';
   const baseWithoutApi = baseUrl.replace('/api/v1', '');
   
   return `${baseWithoutApi}${imageUrl}`;
